@@ -1,9 +1,16 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+date_default_timezone_set('Asia/Jakarta');
+
 class Auth extends CI_Controller {
     
+    public function __construct()
+	{
+		parent::__construct();
 
+        require_once __DIR__ . '/../../assets/ci_helpers/style_helper.php';
+	}
 
 	public function index()
 	{
@@ -55,7 +62,7 @@ class Auth extends CI_Controller {
             $this->load->view('templates/copyright');
             $this->load->view('templates/footer');
         } else {
-            
+
         }
 	}
 }
