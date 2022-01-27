@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = '';
+$config['base_url'] = ENVIRONMENT == 'development' ? 'http://localhost/ci_auth/' : 'https://dhonstudio.com/ci/auth/';
 
 /*
 |--------------------------------------------------------------------------
