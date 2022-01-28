@@ -48,13 +48,15 @@ class Auth extends CI_Controller {
             $this->load->view('templates/toast');
             $this->load->view('templates/copyright');
             $this->load->view('templates/footer');
-            if (isset($_POST['status']) && $_POST['status'] == 'success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
+            if (isset($_POST['status']) && $_POST['status'] == 'registration_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
+            if (isset($_POST['status']) && $_POST['status'] == 'verify_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_success']);
+            if (isset($_POST['status']) && $_POST['status'] == 'verify_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_failed']);
             $this->load->view('templates/end');
         } else {
             $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
             if ($user && password_verify($this->input->post('password'), $user[0]['password_hash']) && $user[0]['status'] > 9) {
-                redirect('auth/dashboard');
+                redirect('https://dhonstudio.com/ci/dashboard');
             } else {
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=failed');
             }
@@ -113,12 +115,12 @@ class Auth extends CI_Controller {
                 ]);
 
                 $this->_sendEmail($token, 'verify');
-                redirect('auth/redirect_post?action=auth&post_name=status&post_value=success');
+                redirect('auth/redirect_post?action=auth&post_name=status&post_value=registration_success');
             }
         }
 	}
 
-    public function _sendEmail(string $token, string $type)
+    private function _sendEmail(string $token, string $type)
     {
         /*
         | -------------------------------------------------------------------
@@ -156,11 +158,11 @@ class Auth extends CI_Controller {
                 "Account Verification", 
                 'https://dhonstudio.com/assets/img/logo.png', 
                 $this->input->post('firstName').' '.$this->input->post('lastName'), 
-                "Please activate your account by follow this link.<br>
+                "Please verify your account by follow this link.<br>
                 Link has expired in 24 hour.",
                 [
                     'href' => base_url('auth/verify?email='.$this->input->post('email').'&token='.urlencode($token)),
-                    'text' => 'Activate'
+                    'text' => 'Verify'
                 ],
                 'Add no-reply@dhonstudio.com to prevent our email mark as SPAM. If our email mark as SPAM, please mark as not SPAM.',
                 'Dhon Studio',
@@ -174,6 +176,24 @@ class Auth extends CI_Controller {
 			echo $this->email->print_debugger();
 			die;
 		}
+    }
+
+    public function verify()
+    {
+        $expired    = time() - (60*60*24);
+        $match      = $this->dhonapi->get('project', 'user', [
+            'email'                 => $this->input->get('email'), 
+            'verification_token'    => $this->input->get('token'),
+            'status'                => 9,
+            'created_at__more'      => $expired,
+        ]);
+        if ($match) {
+            $this->dhonapi->post('project', 'user', ['status' => 10, 'id' => $match[0]['id']]);
+            redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_success');
+        } else {
+            $this->dhonapi->post('project', 'user', ['status' => 8, 'id' => $match[0]['id']]);
+            redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
+        }
     }
 
     public function redirect_post()
