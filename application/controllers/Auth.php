@@ -112,7 +112,7 @@ class Auth extends CI_Controller {
                     'status'                => 9,
                 ]);
 
-                // $this->_sendEmail($token, 'verify');
+                $this->_sendEmail($token, 'verify');
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=success');
             }
         }

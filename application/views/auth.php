@@ -10,12 +10,14 @@
                                     <div class="card-body">
                                         <form method="post" action="<?= base_url('auth') ?>">
                                             <div class="form-floating mb-3">
-                                                <input name="email" class="form-control" id="inputEmail" type="email" placeholder="name@example.com" />
+                                                <input name="email" value="<?= set_value('email');?>" class="form-control" id="inputEmail" type="email" placeholder="name@example.com" />
                                                 <label for="inputEmail">Email address</label>
+                                                <?= form_error('email', '<small class="text-danger pl-3">', '</small>');?>
                                             </div>
                                             <div class="form-floating mb-3">
                                                 <input name="password" class="form-control" id="inputPassword" type="password" placeholder="Password" />
                                                 <label for="inputPassword">Password</label>
+                                                <?= form_error('password', '<small class="text-danger pl-3">', '</small>');?>
                                             </div>
                                             <div class="form-check mb-3">
                                                 <input class="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
