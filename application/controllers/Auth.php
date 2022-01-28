@@ -43,11 +43,11 @@ class Auth extends CI_Controller {
                 ],
             ];
 
-            $this->load->view('templates/header', $data);
+            $this->load->view('ci_templates/header', $data);
             $this->load->view('auth');
-            $this->load->view('templates/toast');
-            $this->load->view('templates/copyright');
-            $this->load->view('templates/footer');
+            $this->load->view('ci_templates/toast');
+            $this->load->view('copyright');
+            $this->load->view('ci_templates/footer');
             if (isset($_POST['status']) && $_POST['status'] == 'registration_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'registration_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_failed']);
             if (isset($_POST['status']) && $_POST['status'] == 'verify_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_success']);
@@ -56,7 +56,7 @@ class Auth extends CI_Controller {
             if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
             if (isset($_POST['status']) && $_POST['status'] == 'reset_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'reset_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
-            $this->load->view('templates/end');
+            $this->load->view('ci_templates/end');
         } else {
             $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
             if ($user && password_verify($this->input->post('password'), $user[0]['password_hash']) && $user[0]['status'] > 9) {
@@ -92,13 +92,13 @@ class Auth extends CI_Controller {
                 ],
             ];
 
-            $this->load->view('templates/header', $data);
+            $this->load->view('ci_templates/header', $data);
             $this->load->view('register');
-            $this->load->view('templates/toast');
-            $this->load->view('templates/copyright');
-            $this->load->view('templates/footer');
+            $this->load->view('ci_templates/toast');
+            $this->load->view('copyright');
+            $this->load->view('ci_templates/footer');
             if (isset($_POST['status']) && $_POST['status'] == 'email_duplicate') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'email_duplicate']);
-            $this->load->view('templates/end');
+            $this->load->view('ci_templates/end');
         } else {
             $users      = $this->dhonapi->get('project', 'user');
             $emails     = array_column($users, 'email');
@@ -146,13 +146,13 @@ class Auth extends CI_Controller {
                 ],
             ];
 
-            $this->load->view('templates/header', $data);
+            $this->load->view('ci_templates/header', $data);
             $this->load->view('forgot_password');
-            $this->load->view('templates/toast');
-            $this->load->view('templates/copyright');
-            $this->load->view('templates/footer');
+            $this->load->view('ci_templates/toast');
+            $this->load->view('copyright');
+            $this->load->view('ci_templates/footer');
             if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
-            $this->load->view('templates/end');
+            $this->load->view('ci_templates/end');
         } else {
             $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
             if ($user && $user[0]['status'] > 9) {
@@ -306,13 +306,13 @@ class Auth extends CI_Controller {
                     'token' => $this->input->get('token'),
                 ];
     
-                $this->load->view('templates/header', $data);
+                $this->load->view('ci_templates/header', $data);
                 $this->load->view('reset_password');
-                $this->load->view('templates/toast');
-                $this->load->view('templates/copyright');
-                $this->load->view('templates/footer');
+                $this->load->view('ci_templates/toast');
+                $this->load->view('copyright');
+                $this->load->view('ci_templates/footer');
                 if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
-                $this->load->view('templates/end');
+                $this->load->view('ci_templates/end');
             } else {
                 $this->dhonapi->post('project', 'user', ['password_hash' => password_hash($this->input->post('password'), PASSWORD_DEFAULT), 'status' => 10, 'id' => $match[0]['id']]);
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=reset_success');
@@ -330,6 +330,6 @@ class Auth extends CI_Controller {
             'post_value'    => $_GET['post_value'],
         ];
 
-        $this->load->view('templates/redirect_post', $data);
+        $this->load->view('ci_templates/redirect_post', $data);
     }
 }
