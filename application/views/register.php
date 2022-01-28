@@ -11,35 +11,35 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <div class="form-floating mb-3 mb-md-0">
-                                                        <input name="firstName" class="form-control" id="inputFirstName" type="text" placeholder="Enter your first name" />
+                                                        <input name="firstName" value="<?= set_value('firstName');?>" class="form-control" id="inputFirstName" type="text" placeholder="Enter your first name" />
                                                         <label for="inputFirstName">First name</label>
                                                         <?= form_error('firstName', '<small class="text-danger pl-3">', '</small>');?>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-floating">
-                                                        <input name="lastName" class="form-control" id="inputLastName" type="text" placeholder="Enter your last name" />
+                                                        <input name="lastName" value="<?= set_value('lastName');?>" class="form-control" id="inputLastName" type="text" placeholder="Enter your last name" />
                                                         <label for="inputLastName">Last name</label>
                                                         <?= form_error('lastName', '<small class="text-danger pl-3">', '</small>');?>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input name="email" class="form-control" id="inputEmail" type="email" placeholder="name@example.com" />
+                                                <input name="email" value="<?= set_value('email');?>" class="form-control" id="inputEmail" type="email" placeholder="name@example.com" />
                                                 <label for="inputEmail">Email address</label>
                                                 <?= form_error('email', '<small class="text-danger pl-3">', '</small>');?>
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <div class="form-floating mb-3 mb-md-0">
-                                                        <input name="password" class="form-control" id="inputPassword" type="password" placeholder="Create a password" />
+                                                        <input name="password" value="<?= set_value('password');?>" class="form-control" id="inputPassword" type="password" placeholder="Create a password" />
                                                         <label for="inputPassword">Password</label>
                                                         <?= form_error('password', '<small class="text-danger pl-3">', '</small>');?>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-floating mb-3 mb-md-0">
-                                                        <input name="repeat_password" class="form-control" id="inputPasswordConfirm" type="password" placeholder="Confirm password" />
+                                                        <input name="repeat_password" value="<?= set_value('repeat_password');?>" class="form-control" id="inputPasswordConfirm" type="password" placeholder="Confirm password" />
                                                         <label for="inputPasswordConfirm">Confirm Password</label>
                                                         <?= form_error('repeat_password', '<small class="text-danger pl-3">', '</small>');?>
                                                     </div>
@@ -59,3 +59,18 @@
                     </div>
                 </main>
             </div>
+
+            <div class="position-fixed top-0 start-0 p-3" style="z-index: 11">
+              <div id="email_duplicate" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                  <!-- <img src="..." class="rounded me-2" alt="..."> -->
+                  <strong class="me-auto">Attention</strong>
+                  <small>a second ago</small>
+                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                  Email address is already registered
+                </div>
+              </div>
+            </div>
+
