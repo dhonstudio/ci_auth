@@ -59,18 +59,3 @@
                     </div>
                 </main>
             </div>
-
-            <div class="position-fixed top-0 start-0 p-3" style="z-index: 11">
-              <div id="email_duplicate" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                  <!-- <img src="..." class="rounded me-2" alt="..."> -->
-                  <strong class="me-auto">Attention</strong>
-                  <small>a second ago</small>
-                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                  Email address is already registered
-                </div>
-              </div>
-            </div>
-

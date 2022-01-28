@@ -1,4 +1,5 @@
 .vscode
+application/helpers/email_config_helper.php
 
 .DS_Store
 
