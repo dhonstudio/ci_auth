@@ -11,6 +11,18 @@
     </div>
   </div>
 
+  <div id="registration_failed" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+    <div class="toast-header">
+      <!-- <img src="..." class="rounded me-2" alt="..."> -->
+      <strong class="me-auto">Failed</strong>
+      <small>a second ago</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Registration failed, please repeat your registration
+    </div>
+  </div>
+
   <div id="registration_success" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
     <div class="toast-header">
       <!-- <img src="..." class="rounded me-2" alt="..."> -->
@@ -26,7 +38,7 @@
   <div id="login_failed" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
       <!-- <img src="..." class="rounded me-2" alt="..."> -->
-      <strong class="me-auto">Attention</strong>
+      <strong class="me-auto">Failed</strong>
       <small>a second ago</small>
       <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
@@ -38,7 +50,7 @@
   <div id="verify_failed" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
       <!-- <img src="..." class="rounded me-2" alt="..."> -->
-      <strong class="me-auto">Attention</strong>
+      <strong class="me-auto">Failed</strong>
       <small>a second ago</small>
       <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
@@ -50,7 +62,7 @@
   <div id="verify_success" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
       <!-- <img src="..." class="rounded me-2" alt="..."> -->
-      <strong class="me-auto">Attention</strong>
+      <strong class="me-auto">Success</strong>
       <small>a second ago</small>
       <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>

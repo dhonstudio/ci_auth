@@ -49,6 +49,7 @@ class Auth extends CI_Controller {
             $this->load->view('templates/copyright');
             $this->load->view('templates/footer');
             if (isset($_POST['status']) && $_POST['status'] == 'registration_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
+            if (isset($_POST['status']) && $_POST['status'] == 'registration_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_failed']);
             if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
             if (isset($_POST['status']) && $_POST['status'] == 'verify_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'verify_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_failed']);
@@ -93,15 +94,17 @@ class Auth extends CI_Controller {
             $this->load->view('templates/toast');
             $this->load->view('templates/copyright');
             $this->load->view('templates/footer');
-            if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'email_duplicate']);
+            if (isset($_POST['status']) && $_POST['status'] == 'email_duplicate') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'email_duplicate']);
             $this->load->view('templates/end');
         } else {
             $users      = $this->dhonapi->get('project', 'user');
             $emails     = array_column($users, 'email');
             if (in_array($this->input->post('email'), $emails)) {
-                redirect('auth/redirect_post?action=auth/register&post_name=status&post_value=failed');
+                redirect('auth/redirect_post?action=auth/register&post_name=status&post_value=email_duplicate');
             } else {
                 $token  = base64_encode(random_bytes(32));
+
+                $this->_sendEmail($token, 'verify');
 
                 $this->dhonapi->post('project', 'user', [
                     'fullName'              => $this->input->post('firstName').' '.$this->input->post('lastName'),
@@ -113,8 +116,7 @@ class Auth extends CI_Controller {
                     'verification_token'    => $token,
                     'status'                => 9,
                 ]);
-
-                $this->_sendEmail($token, 'verify');
+                
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=registration_success');
             }
         }
@@ -173,7 +175,7 @@ class Auth extends CI_Controller {
         if($this->email->send()) {
 			return true;
 		} else {
-			echo $this->email->print_debugger();
+			redirect('auth/redirect_post?action=auth&post_name=status&post_value=registration_failed');
 			die;
 		}
     }
