@@ -50,9 +50,10 @@ class Auth extends CI_Controller {
             $this->load->view('templates/footer');
             if (isset($_POST['status']) && $_POST['status'] == 'registration_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'registration_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_failed']);
-            if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
             if (isset($_POST['status']) && $_POST['status'] == 'verify_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'verify_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_failed']);
+            if (isset($_POST['status']) && $_POST['status'] == 'forgot_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_success']);
+            if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
             $this->load->view('templates/end');
         } else {
             $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
@@ -77,7 +78,7 @@ class Auth extends CI_Controller {
 		if($this->form_validation->run() == false) {
             $data = [
                 'lang'          => 'en',
-                'title'         => 'SB Admin 2 - Login',
+                'title'         => 'SB Admin 2 - Register',
                 'css'           => [
                     $this->css['sb-admin'],
                 ],
@@ -116,8 +117,56 @@ class Auth extends CI_Controller {
                     'verification_token'    => $token,
                     'status'                => 9,
                 ]);
-                
+
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=registration_success');
+            }
+        }
+	}
+
+    public function forgot_password()
+	{
+        if (!isset($_POST['status'])) {
+            $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+        }
+
+		if($this->form_validation->run() == false) {
+            $data = [
+                'lang'          => 'en',
+                'title'         => 'SB Admin 2 - Forgot Password',
+                'css'           => [
+                    $this->css['sb-admin'],
+                ],
+                'body_class'    => 'bg-primary',
+                'js'            => [
+                    $this->js['fontawesome5'],
+                    $this->js['bootstrap-bundle5'],
+                    $this->js['jquery36'],
+                ],
+            ];
+
+            $this->load->view('templates/header', $data);
+            $this->load->view('forgot_password');
+            $this->load->view('templates/toast');
+            $this->load->view('templates/copyright');
+            $this->load->view('templates/footer');
+            if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
+            $this->load->view('templates/end');
+        } else {
+            $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
+            if ($user && $user[0]['status'] > 9) {
+                $token  = base64_encode(random_bytes(32));
+
+                $this->_sendEmail($token, 'forgot');
+
+                $this->dhonapi->post('project', 'user', [
+                    'id'                    => $user[0]['id'],
+                    'password_reset_token'  => $token,
+                    'status'                => 11,
+                ]);
+
+                redirect('auth/redirect_post?action=auth&post_name=status&post_value=forgot_success');
+            } else {
+                redirect('auth/redirect_post?action=auth/forgot_password&post_name=status&post_value=forgot_failed');
             }
         }
 	}
@@ -170,12 +219,33 @@ class Auth extends CI_Controller {
                 'Dhon Studio',
                 'https://wa.me/6287700889913'
             );
+
+            $fail_redirect = 'auth/redirect_post?action=auth&post_name=status&post_value=registration_failed';
+        } else if ($type == 'forgot') {
+            $fullName = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')])[0]['fullName'];
+            $this->email->subject("Reset Password");
+            $this->dhonemail->message(
+                "Reset Password", 
+                'https://dhonstudio.com/assets/img/logo.png', 
+                $fullName, 
+                "To reset your password, please follow this link.<br>
+                Link has expired in 24 hour.",
+                [
+                    'href' => base_url('auth/reset_password?email='.$this->input->post('email').'&token='.urlencode($token)),
+                    'text' => 'Reset Password'
+                ],
+                'Add no-reply@dhonstudio.com to prevent our email mark as SPAM. If our email mark as SPAM, please mark as not SPAM.',
+                'Dhon Studio',
+                'https://wa.me/6287700889913'
+            );
+
+            $fail_redirect = 'auth/redirect_post?action=auth/forgot_password&post_name=status&post_value=forgot_failed';
         }
 
         if($this->email->send()) {
 			return true;
 		} else {
-			redirect('auth/redirect_post?action=auth&post_name=status&post_value=registration_failed');
+			redirect($fail_redirect);
 			die;
 		}
     }
@@ -196,6 +266,24 @@ class Auth extends CI_Controller {
             $this->dhonapi->post('project', 'user', ['status' => 8, 'id' => $match[0]['id']]);
             redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
         }
+    }
+
+    public function reset_password()
+    {
+        // $expired    = time() - (60*60*24);
+        // $match      = $this->dhonapi->get('project', 'user', [
+        //     'email'                 => $this->input->get('email'), 
+        //     'verification_token'    => $this->input->get('token'),
+        //     'status'                => 9,
+        //     'created_at__more'      => $expired,
+        // ]);
+        // if ($match) {
+        //     $this->dhonapi->post('project', 'user', ['status' => 10, 'id' => $match[0]['id']]);
+        //     redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_success');
+        // } else {
+        //     $this->dhonapi->post('project', 'user', ['status' => 8, 'id' => $match[0]['id']]);
+        //     redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
+        // }
     }
 
     public function redirect_post()
