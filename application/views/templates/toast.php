@@ -22,4 +22,16 @@
       Registration successfully, please activate your account by link sent to your email
     </div>
   </div>
+
+  <div id="login_failed" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <!-- <img src="..." class="rounded me-2" alt="..."> -->
+      <strong class="me-auto">Attention</strong>
+      <small>a second ago</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Login failed
+    </div>
+  </div>
 </div>

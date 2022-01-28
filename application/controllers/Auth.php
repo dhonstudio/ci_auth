@@ -23,29 +23,42 @@ class Auth extends CI_Controller {
 
 	public function index()
 	{
+        if (!isset($_POST['status'])) {
+            $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+            $this->form_validation->set_rules('password', 'Password', 'required|trim');
+        }
 
+        if($this->form_validation->run() == false) {
+            $data = [
+                'lang'          => 'en',
+                'title'         => 'SB Admin 2 - Login',
+                'css'           => [
+                    $this->css['sb-admin'],
+                ],
+                'body_class'    => 'bg-primary',
+                'js'            => [
+                    $this->js['fontawesome5'],
+                    $this->js['bootstrap-bundle5'],
+                    $this->js['jquery36'],
+                ],
+            ];
 
-        $data = [
-            'lang'          => 'en',
-            'title'         => 'SB Admin 2 - Login',
-            'css'           => [
-				$this->css['sb-admin'],
-			],
-            'body_class'    => 'bg-primary',
-            'js'            => [
-                $this->js['fontawesome5'],
-                $this->js['bootstrap-bundle5'],
-                $this->js['jquery36'],
-            ],
-        ];
-
-		$this->load->view('templates/header', $data);
-		$this->load->view('auth');
-        $this->load->view('templates/toast');
-		$this->load->view('templates/copyright');
-		$this->load->view('templates/footer');
-        if (isset($_POST['status']) && $_POST['status'] == 'success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
-        $this->load->view('templates/end');
+            $this->load->view('templates/header', $data);
+            $this->load->view('auth');
+            $this->load->view('templates/toast');
+            $this->load->view('templates/copyright');
+            $this->load->view('templates/footer');
+            if (isset($_POST['status']) && $_POST['status'] == 'success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'registration_success']);
+            if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
+            $this->load->view('templates/end');
+        } else {
+            $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
+            if ($user && password_verify($this->input->post('password'), $user[0]['password_hash']) && $user[0]['status'] > 9) {
+                redirect('auth/dashboard');
+            } else {
+                redirect('auth/redirect_post?action=auth&post_name=status&post_value=failed');
+            }
+        }
 	}
 
     public function register()
@@ -99,7 +112,7 @@ class Auth extends CI_Controller {
                     'status'                => 9,
                 ]);
 
-                $this->_sendEmail($token, 'verify');
+                // $this->_sendEmail($token, 'verify');
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=success');
             }
         }
