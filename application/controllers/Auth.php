@@ -15,8 +15,8 @@ class Auth extends CI_Controller {
         require_once __DIR__ . '/../../assets/ci_libraries/DhonEmail.php';
         $this->dhonemail = new DhonEmail;
 
-        $this->dhonapi->api_url['development'] = 'http://localhost/ci_api/api/';
-        $this->dhonapi->api_url['production'] = 'https://dhonstudio.com/ci/api/api/';
+        $this->dhonapi->api_url['development'] = 'http://localhost/ci_api/';
+        $this->dhonapi->api_url['production'] = 'https://dhonstudio.com/ci/api/';
         $this->dhonapi->username = 'admin';
         $this->dhonapi->password = 'admin';
 	}
