@@ -256,14 +256,17 @@ class Auth extends CI_Controller {
         $match      = $this->dhonapi->get('project', 'user', [
             'email'                 => $this->input->get('email'), 
             'verification_token'    => $this->input->get('token'),
-            'status'                => 9,
-            'created_at__more'      => $expired,
+            'status'                => 9
         ]);
         if ($match) {
-            $this->dhonapi->post('project', 'user', ['status' => 10, 'id' => $match[0]['id']]);
-            redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_success');
+            if ($match[0]['created_at'] > $expired) {
+                $this->dhonapi->post('project', 'user', ['status' => 10, 'id' => $match[0]['id']]);
+                redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_success');
+            } else {
+                $this->dhonapi->delete('project', 'user', $match[0]['id']);
+                redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
+            }
         } else {
-            $this->dhonapi->post('project', 'user', ['status' => 8, 'id' => $match[0]['id']]);
             redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
         }
     }
