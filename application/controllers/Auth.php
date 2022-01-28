@@ -53,6 +53,8 @@ class Auth extends CI_Controller {
             if (isset($_POST['status']) && $_POST['status'] == 'verify_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'verify_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'verify_failed']);
             if (isset($_POST['status']) && $_POST['status'] == 'forgot_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_success']);
+            if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
+            if (isset($_POST['status']) && $_POST['status'] == 'reset_success') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'reset_success']);
             if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
             $this->load->view('templates/end');
         } else {
@@ -273,20 +275,51 @@ class Auth extends CI_Controller {
 
     public function reset_password()
     {
-        // $expired    = time() - (60*60*24);
-        // $match      = $this->dhonapi->get('project', 'user', [
-        //     'email'                 => $this->input->get('email'), 
-        //     'verification_token'    => $this->input->get('token'),
-        //     'status'                => 9,
-        //     'created_at__more'      => $expired,
-        // ]);
-        // if ($match) {
-        //     $this->dhonapi->post('project', 'user', ['status' => 10, 'id' => $match[0]['id']]);
-        //     redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_success');
-        // } else {
-        //     $this->dhonapi->post('project', 'user', ['status' => 8, 'id' => $match[0]['id']]);
-        //     redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
-        // }
+        $expired    = time() - (60*60*24);
+        $match      = $this->dhonapi->get('project', 'user', [
+            'email'                 => $this->input->get('email'), 
+            'password_reset_token'  => $this->input->get('token'),
+            'status'                => 11,
+            'created_at__more'      => $expired,
+        ]);
+        if ($match) {
+            if (!isset($_POST['status'])) {
+                $this->form_validation->set_rules('password', 'Password', 'required|trim|min_length[3]|max_length[20]');
+                $this->form_validation->set_rules('repeat_password', 'Repeat Password', 'required|trim|matches[password]');
+            }
+
+            if($this->form_validation->run() == false) {
+                $data = [
+                    'lang'          => 'en',
+                    'title'         => 'SB Admin 2 - Reset Password',
+                    'css'           => [
+                        $this->css['sb-admin'],
+                    ],
+                    'body_class'    => 'bg-primary',
+                    'js'            => [
+                        $this->js['fontawesome5'],
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery36'],
+                    ],
+
+                    'email' => $this->input->get('email'),
+                    'token' => $this->input->get('token'),
+                ];
+    
+                $this->load->view('templates/header', $data);
+                $this->load->view('reset_password');
+                $this->load->view('templates/toast');
+                $this->load->view('templates/copyright');
+                $this->load->view('templates/footer');
+                if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
+                $this->load->view('templates/end');
+            } else {
+                $this->dhonapi->post('project', 'user', ['password_hash' => password_hash($this->input->post('password'), PASSWORD_DEFAULT), 'status' => 10, 'id' => $match[0]['id']]);
+                redirect('auth/redirect_post?action=auth&post_name=status&post_value=reset_success');
+            }
+        } else {
+            redirect('auth/redirect_post?action=auth&post_name=status&post_value=forgot_failed');
+        }
     }
 
     public function redirect_post()
