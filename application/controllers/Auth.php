@@ -19,6 +19,8 @@ class Auth extends CI_Controller {
         $this->dhonapi->api_url['production'] = 'https://dhonstudio.com/ci/api/';
         $this->dhonapi->username = 'admin';
         $this->dhonapi->password = 'admin';
+
+        $this->lang = 'en';
 	}
 
 	public function index()
@@ -30,7 +32,6 @@ class Auth extends CI_Controller {
 
         if($this->form_validation->run() == false) {
             $data = [
-                'lang'          => 'en',
                 'title'         => 'SB Admin 2 - Login',
                 'css'           => [
                     $this->css['sb-admin'],
@@ -79,7 +80,6 @@ class Auth extends CI_Controller {
 
 		if($this->form_validation->run() == false) {
             $data = [
-                'lang'          => 'en',
                 'title'         => 'SB Admin 2 - Register',
                 'css'           => [
                     $this->css['sb-admin'],
@@ -133,7 +133,6 @@ class Auth extends CI_Controller {
 
 		if($this->form_validation->run() == false) {
             $data = [
-                'lang'          => 'en',
                 'title'         => 'SB Admin 2 - Forgot Password',
                 'css'           => [
                     $this->css['sb-admin'],
@@ -290,7 +289,6 @@ class Auth extends CI_Controller {
 
             if($this->form_validation->run() == false) {
                 $data = [
-                    'lang'          => 'en',
                     'title'         => 'SB Admin 2 - Reset Password',
                     'css'           => [
                         $this->css['sb-admin'],
