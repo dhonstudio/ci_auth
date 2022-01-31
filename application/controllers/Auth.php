@@ -32,7 +32,7 @@ class Auth extends CI_Controller {
 
         if($this->form_validation->run() == false) {
             $data = [
-                'title'         => 'SB Admin 2 - Login',
+                'title'         => 'SB Admin - Login',
                 'css'           => [
                     $this->css['sb-admin'],
                 ],
@@ -80,7 +80,7 @@ class Auth extends CI_Controller {
 
 		if($this->form_validation->run() == false) {
             $data = [
-                'title'         => 'SB Admin 2 - Register',
+                'title'         => 'SB Admin - Register',
                 'css'           => [
                     $this->css['sb-admin'],
                 ],
@@ -133,7 +133,7 @@ class Auth extends CI_Controller {
 
 		if($this->form_validation->run() == false) {
             $data = [
-                'title'         => 'SB Admin 2 - Forgot Password',
+                'title'         => 'SB Admin - Forgot Password',
                 'css'           => [
                     $this->css['sb-admin'],
                 ],
@@ -289,7 +289,7 @@ class Auth extends CI_Controller {
 
             if($this->form_validation->run() == false) {
                 $data = [
-                    'title'         => 'SB Admin 2 - Reset Password',
+                    'title'         => 'SB Admin - Reset Password',
                     'css'           => [
                         $this->css['sb-admin'],
                     ],
