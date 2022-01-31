@@ -20,7 +20,7 @@ class Auth extends CI_Controller {
         $this->dhonapi->username = 'admin';
         $this->dhonapi->password = 'admin';
 
-        $this->lang = 'en';
+        $this->language = 'en';
 	}
 
 	public function index()
