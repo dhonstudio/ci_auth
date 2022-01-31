@@ -21,6 +21,13 @@ class Auth extends CI_Controller {
         $this->dhonapi->password = 'admin';
 
         $this->language = 'en';
+
+        $this->secure_prefix = 'PID3459s';
+        if (ENVIRONMENT == 'development') {
+            $this->input->cookie("m{$this->secure_prefix}") ? redirect('http://localhost/ci_dashboard') : true;
+        } else {
+            $this->input->cookie("__Secure-{$this->secure_prefix}") ? redirect('https://dhonstudio.com/ci/dashboard') : true;
+        }
 	}
 
 	public function index()
@@ -61,7 +68,15 @@ class Auth extends CI_Controller {
         } else {
             $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
             if ($user && password_verify($this->input->post('password'), $user[0]['password_hash']) && $user[0]['status'] > 9) {
-                redirect('https://dhonstudio.com/ci/dashboard');
+                $cookie_prefix = ENVIRONMENT == 'development' ? 'm' : '__Secure-';
+                $user_cookie = array(
+                    'name'   => $this->secure_prefix,
+                    'value'  => $this->encryption->encrypt($user[0]['id']),
+                    'expire' => 365 * 24 * 60 * 60,
+                    'prefix' => $cookie_prefix,
+                );
+                set_cookie($user_cookie);
+                ENVIRONMENT == 'development' ? redirect('http://localhost/ci_dashboard') : redirect('https://dhonstudio.com/ci/dashboard');
             } else {
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=failed');
             }
