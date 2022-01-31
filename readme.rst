@@ -1,3 +1,9 @@
+####
+Demo
+####
+
+You can try this repo demo in `CI3 - Login and Register <https://dhonstudio.com/ci/auth>`_.
+
 ###################
 What is CodeIgniter
 ###################
