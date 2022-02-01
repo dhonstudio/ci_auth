@@ -61,7 +61,6 @@ $autoload['packages'] = array();
 $autoload['libraries'] = array(
     'form_validation',
     'email',
-    'encryption',
 );
 
 /*

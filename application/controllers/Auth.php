@@ -22,12 +22,16 @@ class Auth extends CI_Controller {
 
         $this->language = 'en';
 
-        $this->secure_prefix = 'PID3459s';
         if (ENVIRONMENT == 'development') {
-            $this->input->cookie("m{$this->secure_prefix}") ? redirect('http://localhost/ci_dashboard') : true;
+            $this->cookie_prefix    = 'm';
+            $this->auth_redirect    = 'http://localhost/ci_dashboard';
         } else {
-            $this->input->cookie("__Secure-{$this->secure_prefix}") ? redirect('https://dhonstudio.com/ci/dashboard') : true;
+            $this->cookie_prefix    = '__Secure-';
+            $this->auth_redirect    = 'https://dhonstudio.com/ci/dashboard';
         }
+        $this->secure_prefix    = 'PID3459s';
+        $this->secure_auth      = "{$this->secure_prefix}A";
+        if ($this->input->cookie("{$this->cookie_prefix}{$this->secure_auth}") && $this->input->cookie("{$this->cookie_prefix}{$this->secure_prefix}")) redirect($this->auth_redirect);
 	}
 
 	public function index()
@@ -66,17 +70,31 @@ class Auth extends CI_Controller {
             if (isset($_POST['status']) && $_POST['status'] == 'failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'login_failed']);
             $this->load->view('ci_templates/end');
         } else {
-            $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
+            $user = $this->dhonapi->get('project', 'user_ci', ['email' => $this->input->post('email')]);
             if ($user && password_verify($this->input->post('password'), $user[0]['password_hash']) && $user[0]['status'] > 9) {
-                $cookie_prefix = ENVIRONMENT == 'development' ? 'm' : '__Secure-';
+                $this->load->library('encryption');
+                $auth_cookie = array(
+                    'name'   => $this->secure_auth,
+                    'value'  => $this->encryption->encrypt($user[0]['auth_key']),
+                    'expire' => 365 * 24 * 60 * 60,
+                    'prefix' => $this->cookie_prefix,
+                );
+                $this->encryption->initialize(
+                    array(
+                        'cipher' => 'aes-256',
+                        'mode' => 'ctr',
+                        'key' => $user[0]['auth_key']
+                    )
+                );
                 $user_cookie = array(
                     'name'   => $this->secure_prefix,
                     'value'  => $this->encryption->encrypt($user[0]['id']),
                     'expire' => 365 * 24 * 60 * 60,
-                    'prefix' => $cookie_prefix,
+                    'prefix' => $this->cookie_prefix,
                 );
                 set_cookie($user_cookie);
-                ENVIRONMENT == 'development' ? redirect('http://localhost/ci_dashboard') : redirect('https://dhonstudio.com/ci/dashboard');
+                set_cookie($auth_cookie);
+                redirect($this->auth_redirect);
             } else {
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=failed');
             }
@@ -115,7 +133,7 @@ class Auth extends CI_Controller {
             if (isset($_POST['status']) && $_POST['status'] == 'email_duplicate') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'email_duplicate']);
             $this->load->view('ci_templates/end');
         } else {
-            $users      = $this->dhonapi->get('project', 'user');
+            $users      = $this->dhonapi->get('project', 'user_ci');
             $emails     = array_column($users, 'email');
             if (in_array($this->input->post('email'), $emails)) {
                 redirect('auth/redirect_post?action=auth/register&post_name=status&post_value=email_duplicate');
@@ -124,10 +142,11 @@ class Auth extends CI_Controller {
 
                 $this->_sendEmail($token, 'verify');
 
-                $this->dhonapi->post('project', 'user', [
-                    'fullName'              => $this->input->post('firstName').' '.$this->input->post('lastName'),
+                $this->load->helper('string');
+                $this->dhonapi->post('project', 'user_ci', [
                     'email'                 => $this->input->post('email'),
-                    'username'              => $this->input->post('email'),
+                    'fullName'              => $this->input->post('firstName').' '.$this->input->post('lastName'),
+                    'auth_key'              => random_string('alnum', 32),
                     'password_hash'         => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
                     'created_at'            => time(),
                     'updated_at'            => time(),
@@ -168,16 +187,17 @@ class Auth extends CI_Controller {
             if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
             $this->load->view('ci_templates/end');
         } else {
-            $user = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')]);
+            $user = $this->dhonapi->get('project', 'user_ci', ['email' => $this->input->post('email')]);
             if ($user && $user[0]['status'] > 9) {
                 $token  = base64_encode(random_bytes(32));
 
                 $this->_sendEmail($token, 'forgot');
 
-                $this->dhonapi->post('project', 'user', [
+                $this->dhonapi->post('project', 'user_ci', [
                     'id'                    => $user[0]['id'],
                     'password_reset_token'  => $token,
                     'status'                => 11,
+                    'updated_at'            => time()
                 ]);
 
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=forgot_success');
@@ -238,7 +258,7 @@ class Auth extends CI_Controller {
 
             $fail_redirect = 'auth/redirect_post?action=auth&post_name=status&post_value=registration_failed';
         } else if ($type == 'forgot') {
-            $fullName = $this->dhonapi->get('project', 'user', ['email' => $this->input->post('email')])[0]['fullName'];
+            $fullName = $this->dhonapi->get('project', 'user_ci', ['email' => $this->input->post('email')])[0]['fullName'];
             $this->email->subject("Reset Password");
             $this->dhonemail->message(
                 "Reset Password", 
@@ -269,17 +289,17 @@ class Auth extends CI_Controller {
     public function verify()
     {
         $expired    = time() - (60*60*24);
-        $match      = $this->dhonapi->get('project', 'user', [
+        $match      = $this->dhonapi->get('project', 'user_ci', [
             'email'                 => $this->input->get('email'), 
             'verification_token'    => $this->input->get('token'),
             'status'                => 9
         ]);
         if ($match) {
             if ($match[0]['created_at'] > $expired) {
-                $this->dhonapi->post('project', 'user', ['status' => 10, 'id' => $match[0]['id']]);
+                $this->dhonapi->post('project', 'user_ci', ['status' => 10, 'id' => $match[0]['id']]);
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_success');
             } else {
-                $this->dhonapi->delete('project', 'user', $match[0]['id']);
+                $this->dhonapi->delete('project', 'user_ci', $match[0]['id']);
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=verify_failed');
             }
         } else {
@@ -290,11 +310,11 @@ class Auth extends CI_Controller {
     public function reset_password()
     {
         $expired    = time() - (60*60*24);
-        $match      = $this->dhonapi->get('project', 'user', [
+        $match      = $this->dhonapi->get('project', 'user_ci', [
             'email'                 => $this->input->get('email'), 
             'password_reset_token'  => $this->input->get('token'),
             'status'                => 11,
-            'created_at__more'      => $expired,
+            'updated_at__more'      => $expired,
         ]);
         if ($match) {
             if (!isset($_POST['status'])) {
@@ -327,7 +347,7 @@ class Auth extends CI_Controller {
                 if (isset($_POST['status']) && $_POST['status'] == 'forgot_failed') $this->load->view('ci_scripts/toast_show', ['toast_id' => 'forgot_failed']);
                 $this->load->view('ci_templates/end');
             } else {
-                $this->dhonapi->post('project', 'user', ['password_hash' => password_hash($this->input->post('password'), PASSWORD_DEFAULT), 'status' => 10, 'id' => $match[0]['id']]);
+                $this->dhonapi->post('project', 'user_ci', ['password_hash' => password_hash($this->input->post('password'), PASSWORD_DEFAULT), 'status' => 10, 'id' => $match[0]['id']]);
                 redirect('auth/redirect_post?action=auth&post_name=status&post_value=reset_success');
             }
         } else {
