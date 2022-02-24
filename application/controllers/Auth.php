@@ -54,6 +54,7 @@ class Auth extends CI_Controller {
         $this->secure_prefix    = 'DSC250222s';
         $this->secure_auth      = "DSA250222k";
 
+        $this->load->helper('cookie');
         if ($this->input->cookie("{$this->cookie_prefix}{$this->secure_auth}") && $this->input->cookie("{$this->cookie_prefix}{$this->secure_prefix}")) redirect($this->auth_redirect);
 
         $this->language['active'] = 'en';
