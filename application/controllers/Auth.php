@@ -15,6 +15,8 @@ class Auth extends CI_Controller {
         require_once __DIR__ . '/../../assets/ci_libraries/DhonEmail.php';
         $this->dhonemail = new DhonEmail;
         $this->load->library('form_validation');
+        $this->load->library('google');
+        $this->load->helper('string');
 
         /*
         | -------------------------------------------------------------------
@@ -55,6 +57,7 @@ class Auth extends CI_Controller {
         $this->secure_auth      = "DSA250222k";
 
         $this->load->helper('cookie');
+        if ($this->uri->segment(2) != 'login_google')
         if ($this->input->cookie("{$this->cookie_prefix}{$this->secure_auth}") && $this->input->cookie("{$this->cookie_prefix}{$this->secure_prefix}")) redirect($this->auth_redirect);
 
         $this->language['active'] = 'en';
@@ -180,44 +183,51 @@ class Auth extends CI_Controller {
             $this->load->view('copyright');
             $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
             $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
+            $this->load->view('ci_scripts/google_login');
             $this->load->view('ci_templates/end');
         } else {
             $user = $this->dhonapi->get($this->database, $this->table, ['email' => $this->input->post('email')]);
             if (!empty($user) && password_verify($this->input->post('password'), $user[0]['password_hash']) && $user[0]['status'] > 9) {
-                /*
-                | -------------------------------------------------------------------
-                |  Don't forget to set up encryption key
-                | -------------------------------------------------------------------
-                */
-                $this->load->library('encryption');
+                $this->_login($user);
 
-                $auth_cookie = array(
-                    'name'   => $this->secure_auth,
-                    'value'  => $this->encryption->encrypt($user[0]['auth_key']),
-                    'expire' => 365 * 24 * 60 * 60,
-                    'prefix' => $this->cookie_prefix,
-                );
-                $this->encryption->initialize(
-                    array(
-                        'cipher' => 'aes-256',
-                        'mode' => 'ctr',
-                        'key' => $user[0]['auth_key']
-                    )
-                );
-                $user_cookie = array(
-                    'name'   => $this->secure_prefix,
-                    'value'  => $this->encryption->encrypt($user[0]['id']),
-                    'expire' => 365 * 24 * 60 * 60,
-                    'prefix' => $this->cookie_prefix,
-                );
-                set_cookie($auth_cookie);
-                set_cookie($user_cookie);
                 redirect($this->auth_redirect);
             } else {
                 redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=login_failed&post_name2=email&post_value2='.$this->input->post('email').'&post_name3=version&post_value3='.$_GET['version']);
             }
         }
 	}
+
+    private function _login(array $user)
+    {
+        /*
+        | -------------------------------------------------------------------
+        |  Don't forget to set up encryption key
+        | -------------------------------------------------------------------
+        */
+        $this->load->library('encryption');
+
+        $auth_cookie = array(
+            'name'   => $this->secure_auth,
+            'value'  => $this->encryption->encrypt($user[0]['auth_key']),
+            'expire' => 365 * 24 * 60 * 60,
+            'prefix' => $this->cookie_prefix,
+        );
+        $this->encryption->initialize(
+            array(
+                'cipher' => 'aes-256',
+                'mode' => 'ctr',
+                'key' => $user[0]['auth_key']
+            )
+        );
+        $user_cookie = array(
+            'name'   => $this->secure_prefix,
+            'value'  => $this->encryption->encrypt($user[0]['id']),
+            'expire' => 365 * 24 * 60 * 60,
+            'prefix' => $this->cookie_prefix,
+        );
+        set_cookie($auth_cookie);
+        set_cookie($user_cookie);
+    }
 
     public function register()
 	{
@@ -286,7 +296,6 @@ class Auth extends CI_Controller {
 
                 $this->_sendEmail($token, 'verify');
 
-                $this->load->helper('string');
                 $this->dhonapi->post($this->database, $this->table, [
                     'email'                 => $this->input->post('email'),
                     'fullName'              => $this->input->post('firstName').' '.$this->input->post('lastName'),
@@ -571,4 +580,43 @@ class Auth extends CI_Controller {
 
         $this->load->view('ci_templates/redirect_post', $data);
     }
+
+    public function login_google(string $status = '')
+	{
+        if ($status == 'success') {
+
+        } else {
+            $this->google->setAccessToken();
+            $user_google    = $this->google->getUserInfo();
+
+            $user           = $this->dhonapi->get($this->database, $this->table, ['email' => $user_google['email']]);
+
+            $data_update = [
+                'google_name'       => $user_google['name'],
+                'google_id' 	    => $user_google['id'],
+                'google_picture'    => $user_google['picture'],
+                'google_gender' 	=> $user_google['gender'],
+                'google_link' 		=> $user_google['link'],
+            ];
+
+            if (empty($user)) {
+                $data_update['email']       = $user_google['email'];
+                $data_update['fullName']    = $user_google['name'];
+                $data_update['auth_key']    = random_string('alnum', 32);
+                $data_update['created_at']  = time();
+                $this->dhonapi->post($this->database, $this->table, $data_update);
+            } else {
+                    $data_update['updated_at']  = time();
+                    $data_update['id']          = $user[0]['id'];
+                    $this->dhonapi->post($this->database, $this->table, $data_update);
+                
+            }
+
+            $user = $this->dhonapi->get($this->database, $this->table, ['email' => $user_google['email']]);
+
+            $this->_login($user);
+
+            redirect('auth/login_google/success');
+        }
+	}
 }
