@@ -122,6 +122,9 @@ class Auth extends CI_Controller {
             ($_POST['status'] == 'reset_success' ? 'reset_success' :
             ($_POST['status'] == 'login_failed' ? 'login_failed'
             : ''))))))))) : '';
+
+        $this->get_version = isset($_GET['version']) ? $_GET['version'] : (isset($_POST['version']) ? $_POST['version'] : '');
+        $this->version = $this->get_version == 'auth2' ? '2' : '';
     }
 
 	public function index()
@@ -132,20 +135,48 @@ class Auth extends CI_Controller {
         }
 
         if($this->form_validation->run() == false) {
-            $data = [
-                'title'         => 'SB Admin - Login',
-                'css'           => [
-                    $this->css['sb-admin'],
-                ],
-                'js'            => [
-                    $this->js['bootstrap-bundle5'],
-                    $this->js['jquery36'],
-                ],
-                'body_class'    => 'bg-primary',
-            ];
+            if ($this->version == '') {
+                $data = [
+                    'title'         => 'SB Admin - Login',
+                    'css'           => [
+                        $this->css['sb-admin'],
+                    ],
+                    'js'            => [
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery36'],
+                    ],
+                    'body_class'    => 'bg-primary',
+                ];
+            }
+
+            /*
+            | -------------------------------------------------------------------
+            |  Auth Version 2
+            | -------------------------------------------------------------------
+            */
+            else if ($this->version == '2') {
+                $data = [
+                    'title'         => 'SB Admin 2 - Login',
+                    'font'          => [
+                        $this->font['google-Nunito'],
+                    ],
+                    'css'           => [
+                        $this->css['fontawesome5'],
+                        $this->css['bootstrap5'],
+                        $this->css['sb-admin-2'],
+                    ],
+                    'js'            => [
+                        $this->js['jquery36'],
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery-easing'],
+                        $this->js['sb-admin-2'],
+                    ],
+                    'body_class'    => 'bg-gradient-primary',
+                ];
+            }
 
             $this->load->view('ci_templates/header', $data);
-            $this->load->view('auth');
+            $this->load->view('auth'.$this->version);
             $this->load->view('copyright');
             $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
             $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
@@ -183,7 +214,7 @@ class Auth extends CI_Controller {
                 set_cookie($user_cookie);
                 redirect($this->auth_redirect);
             } else {
-                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=login_failed&post_name2=email&post_value2='.$this->input->post('email'));
+                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=login_failed&post_name2=email&post_value2='.$this->input->post('email').'&post_name3=version&post_value3='.$_GET['version']);
             }
         }
 	}
@@ -199,20 +230,48 @@ class Auth extends CI_Controller {
         }
 
 		if($this->form_validation->run() == false) {
-            $data = [
-                'title'         => 'SB Admin - Register',
-                'css'           => [
-                    $this->css['sb-admin'],
-                ],
-                'js'            => [
-                    $this->js['bootstrap-bundle5'],
-                    $this->js['jquery36'],
-                ],
-                'body_class'    => 'bg-success',                
-            ];
+            if ($this->version == '') {
+                $data = [
+                    'title'         => 'SB Admin - Register',
+                    'css'           => [
+                        $this->css['sb-admin'],
+                    ],
+                    'js'            => [
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery36'],
+                    ],
+                    'body_class'    => 'bg-success',                
+                ];
+            }
+
+            /*
+            | -------------------------------------------------------------------
+            |  Auth Version 2
+            | -------------------------------------------------------------------
+            */
+            else if ($this->version == '2') {
+                $data = [
+                    'title'         => 'SB Admin 2 - Register',
+                    'font'          => [
+                        $this->font['google-Nunito'],
+                    ],
+                    'css'           => [
+                        $this->css['fontawesome5'],
+                        $this->css['bootstrap5'],
+                        $this->css['sb-admin-2'],
+                    ],
+                    'js'            => [
+                        $this->js['jquery36'],
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery-easing'],
+                        $this->js['sb-admin-2'],
+                    ],
+                    'body_class'    => 'bg-gradient-success',
+                ];
+            }
 
             $this->load->view('ci_templates/header', $data);
-            $this->load->view('register');
+            $this->load->view('register'.$this->version);
             $this->load->view('copyright');
             $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
             $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
@@ -221,7 +280,7 @@ class Auth extends CI_Controller {
             $users      = $this->dhonapi->get($this->database, $this->table);
             $emails     = array_column($users, 'email');
             if (in_array($this->input->post('email'), $emails)) {
-                redirect('auth/redirect_post?action=auth/register&post_name1=status&post_value1=email_duplicate&post_name2=firstName&post_value2='.$this->input->post('firstName').'&post_name3=lastName&post_value3='.$this->input->post('lastName').'&post_name4=email&post_value4='.$this->input->post('email'));
+                redirect('auth/redirect_post?action=auth/register&post_name1=status&post_value1=email_duplicate&post_name2=firstName&post_value2='.$this->input->post('firstName').'&post_name3=lastName&post_value3='.$this->input->post('lastName').'&post_name4=email&post_value4='.$this->input->post('email').'&post_name5=version&post_value5='.$_GET['version']);
             } else {
                 $token  = base64_encode(random_bytes(32));
 
@@ -238,7 +297,7 @@ class Auth extends CI_Controller {
                     'status'                => 9,
                 ]);
 
-                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=registration_success');
+                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=registration_success&post_name2=version&post_value2='.$_GET['version']);
             }
         }
 	}
@@ -250,20 +309,48 @@ class Auth extends CI_Controller {
         }
 
 		if($this->form_validation->run() == false) {
-            $data = [
-                'title'         => 'SB Admin - Forgot Password',
-                'css'           => [
-                    $this->css['sb-admin'],
-                ],
-                'js'            => [
-                    $this->js['bootstrap-bundle5'],
-                    $this->js['jquery36'],
-                ],
-                'body_class'    => 'bg-warning',                
-            ];
+            if ($this->version == '') {
+                $data = [
+                    'title'         => 'SB Admin - Forgot Password',
+                    'css'           => [
+                        $this->css['sb-admin'],
+                    ],
+                    'js'            => [
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery36'],
+                    ],
+                    'body_class'    => 'bg-warning',                
+                ];
+            }
+
+            /*
+            | -------------------------------------------------------------------
+            |  Auth Version 2
+            | -------------------------------------------------------------------
+            */
+            else if ($this->version == '2') {
+                $data = [
+                    'title'         => 'SB Admin 2 - Forgot Password',
+                    'font'          => [
+                        $this->font['google-Nunito'],
+                    ],
+                    'css'           => [
+                        $this->css['fontawesome5'],
+                        $this->css['bootstrap5'],
+                        $this->css['sb-admin-2'],
+                    ],
+                    'js'            => [
+                        $this->js['jquery36'],
+                        $this->js['bootstrap-bundle5'],
+                        $this->js['jquery-easing'],
+                        $this->js['sb-admin-2'],
+                    ],
+                    'body_class'    => 'bg-gradient-warning',
+                ];
+            }
 
             $this->load->view('ci_templates/header', $data);
-            $this->load->view('forgot_password');
+            $this->load->view('forgot_password'.$this->version);
             $this->load->view('copyright');
             $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);            
             $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
@@ -282,9 +369,9 @@ class Auth extends CI_Controller {
                     'updated_at'            => time()
                 ]);
 
-                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=forgot_success');
+                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=forgot_success&post_name2=version&post_value2='.$_GET['version']);
             } else {
-                redirect('auth/redirect_post?action=auth/forgot_password&post_name1=status&post_value1=forgot_failed&post_name2=email&post_value2='.$this->input->post('email'));
+                redirect('auth/redirect_post?action=auth/forgot_password&post_name1=status&post_value1=forgot_failed&post_name2=email&post_value2='.$this->input->post('email').'&post_name3=version&post_value3='.$_GET['version']);
             }
         }
 	}
@@ -331,7 +418,7 @@ class Auth extends CI_Controller {
                 "Please verify your account by follow this link.<br>
                 Link has expired in 24 hour.",
                 [
-                    'href' => base_url('auth/verify?email='.$this->input->post('email').'&token='.urlencode($token)),
+                    'href' => base_url('auth/verify?email='.$this->input->post('email').'&token='.urlencode($token).'&version='.$_GET['version']),
                     'text' => 'Verify'
                 ],
                 'Add '.$this->email_address.' to prevent our email mark as SPAM. If our email mark as SPAM, please mark as not SPAM.',
@@ -350,7 +437,7 @@ class Auth extends CI_Controller {
                 "To reset your password, please follow this link.<br>
                 Link has expired in 24 hour.",
                 [
-                    'href' => base_url('auth/reset_password?email='.$this->input->post('email').'&token='.urlencode($token)),
+                    'href' => base_url('auth/reset_password?email='.$this->input->post('email').'&token='.urlencode($token).'&version='.$_GET['version']),
                     'text' => 'Reset Password'
                 ],
                 'Add '.$this->email_address.' to prevent our email mark as SPAM. If our email mark as SPAM, please mark as not SPAM.',
@@ -380,13 +467,13 @@ class Auth extends CI_Controller {
         if ($match) {
             if ($match[0]['created_at'] > $expired) {
                 $this->dhonapi->post($this->database, $this->table, ['status' => 10, 'id' => $match[0]['id']]);
-                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=verify_success');
+                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=verify_success&post_name2=version&post_value2='.$_GET['version']);
             } else {
                 $this->dhonapi->delete($this->database, $this->table, $match[0]['id']);
-                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=verify_failed');
+                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=verify_failed&post_name2=version&post_value2='.$_GET['version']);
             }
         } else {
-            redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=verify_failed');
+            redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=verify_failed&post_name2=version&post_value2='.$_GET['version']);
         }
     }
 
@@ -394,7 +481,7 @@ class Auth extends CI_Controller {
     {
         $expired    = time() - (60*60*24);
         $match      = $this->dhonapi->get($this->database, $this->table, [
-            'email'                 => $this->input->get('email'), 
+            'email'                 => $this->input->get('email'),
             'password_reset_token'  => $this->input->get('token'),
             'status'                => 11,
             'updated_at__more'      => $expired,
@@ -406,33 +493,61 @@ class Auth extends CI_Controller {
             }
 
             if($this->form_validation->run() == false) {
-                $data = [
-                    'title'         => 'SB Admin - Reset Password',
-                    'css'           => [
-                        $this->css['sb-admin'],
-                    ],
-                    'js'            => [
-                        $this->js['bootstrap-bundle5'],
-                        $this->js['jquery36'],
-                    ],
-                    'body_class'    => 'bg-danger',                    
+                if ($this->version == '') {
+                    $data = [
+                        'title'         => 'SB Admin - Reset Password',
+                        'css'           => [
+                            $this->css['sb-admin'],
+                        ],
+                        'js'            => [
+                            $this->js['bootstrap-bundle5'],
+                            $this->js['jquery36'],
+                        ],
+                        'body_class'    => 'bg-danger',
+                    ];
+                }
 
-                    'email' => $this->input->get('email'),
-                    'token' => $this->input->get('token'),
-                ];
+                /*
+                | -------------------------------------------------------------------
+                |  Auth Version 2
+                | -------------------------------------------------------------------
+                */
+                else if ($this->version == '2') {
+                    $data = [
+                        'title'         => 'SB Admin 2 - Reset Password',
+                        'font'          => [
+                            $this->font['google-Nunito'],
+                        ],
+                        'css'           => [
+                            $this->css['fontawesome5'],
+                            $this->css['bootstrap5'],
+                            $this->css['sb-admin-2'],
+                        ],
+                        'js'            => [
+                            $this->js['jquery36'],
+                            $this->js['bootstrap-bundle5'],
+                            $this->js['jquery-easing'],
+                            $this->js['sb-admin-2'],
+                        ],
+                        'body_class'    => 'bg-gradient-danger',
+                    ];
+                }
+
+                $data['email']  = $this->input->get('email');
+                $data['token']  = urlencode($this->input->get('token'));
     
                 $this->load->view('ci_templates/header', $data);
-                $this->load->view('reset_password');
+                $this->load->view('reset_password'.$this->version);
                 $this->load->view('copyright');
-                $this->load->view('ci_templates/toast', $this->toasts);
+                $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
                 $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
                 $this->load->view('ci_templates/end');
             } else {
                 $this->dhonapi->post($this->database, $this->table, ['password_hash' => password_hash($this->input->post('password'), PASSWORD_DEFAULT), 'status' => 10, 'id' => $match[0]['id']]);
-                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=reset_success');
+                redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=reset_success&post_name2=version&post_value2='.$_GET['version']);
             }
         } else {
-            redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=forgot_failed');
+            redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=forgot_failed&post_name2=version&post_value2='.$_GET['version']);
         }
     }
 
