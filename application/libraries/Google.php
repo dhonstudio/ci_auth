@@ -23,7 +23,7 @@ class Google {
 
 		/*
         | -------------------------------------------------------------------
-        | Don't forget to create google.php on folder config
+        | Don't forget to create google_helper.php on folder helpers
         | -------------------------------------------------------------------
         | Prototype:
         |

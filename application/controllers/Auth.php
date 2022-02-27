@@ -16,6 +16,7 @@ class Auth extends CI_Controller {
         $this->dhonemail = new DhonEmail;
         $this->load->library('form_validation');
         $this->load->library('google');
+        $this->load->library('facebook');
         $this->load->helper('string');
 
         /*
@@ -606,10 +607,11 @@ class Auth extends CI_Controller {
                 $data_update['created_at']  = time();
                 $this->dhonapi->post($this->database, $this->table, $data_update);
             } else {
+                if ($user[0]['google_id'] === null) {
                     $data_update['updated_at']  = time();
                     $data_update['id']          = $user[0]['id'];
                     $this->dhonapi->post($this->database, $this->table, $data_update);
-                
+                }
             }
 
             $user = $this->dhonapi->get($this->database, $this->table, ['email' => $user_google['email']]);
@@ -617,6 +619,70 @@ class Auth extends CI_Controller {
             $this->_login($user);
 
             redirect('auth/login_google/success');
+        }
+	}
+
+    public function login_fb()
+	{
+        if ($this->input->get('code')) {
+            try {
+                $helper 		= $this->facebook->create_helper();
+                $access_token 	= $this->facebook->get_access_token();
+
+                $this->facebook->set_access_token($access_token);
+            }
+            catch (Facebook\Exceptions\FacebookResponseException $e) {
+                exit('Graph returned an error: ' . $e->getMessage());
+            }
+            catch (Facebook\Exceptions\FacebookSDKException $e) {
+                exit('Facebook SDK returned an error: ' . $e->getMessage());
+            }
+
+            if (!isset($access_token)) {
+                if ($helper->getError()) {
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo "Error: " . $helper->getError() . "\n";
+                    echo "Error Code: " . $helper->getErrorCode() . "\n";
+                    echo "Error Reason: " . $helper->getErrorReason() . "\n";
+                    echo "Error Description: " . $helper->getErrorDescription() . "\n";
+                } else {
+                    header('HTTP/1.0 400 Bad Request');
+                    echo 'Bad request';
+                }
+                exit;
+            }
+
+            $user_fb = $this->facebook->get_user('user');
+
+            $user = $this->dhonapi->get($this->database, $this->table, ['email' => $user_fb['email']]);
+
+            $data_update = [
+                'fb_name'       => $user_fb['name'],
+                'fb_id' 	    => $user_fb['id'],
+                'fb_picture'    => $user_fb['picture']['url'],
+            ];
+
+		    if (empty($user)) {
+			    $data_update['email']       = $user_fb['email'];
+                $data_update['fullName']    = $user_fb['name'];
+                $data_update['auth_key']    = random_string('alnum', 32);
+                $data_update['created_at']  = time();
+                $this->dhonapi->post($this->database, $this->table, $data_update);
+			} else {
+				if ($user[0]['fb_id'] === null) {
+					$data_update['updated_at']  = time();
+                    $data_update['id']          = $user[0]['id'];
+                    $this->dhonapi->post($this->database, $this->table, $data_update);
+				}
+			}
+
+			$user = $this->dhonapi->get($this->database, $this->table, ['email' => $user_fb['email']]);
+
+			$this->_login($user);
+
+            redirect('auth');
+        } else {
+            show_404();
         }
 	}
 }

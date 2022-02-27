@@ -40,7 +40,7 @@
                                         <a href="#" onClick="login_google('<?= $this->google->getLoginUrl()?>', '<?= base_url('auth/login_google/success') ?>')" class="btn btn-google btn-user btn-block">
                                             <i class="fab fa-google fa-fw"></i> Login with Google
                                         </a>
-                                        <a href="index.html" class="btn btn-facebook btn-user btn-block">
+                                        <a href="<?= $this->facebook->create_auth_url(base_url('auth/login_fb'))?>" class="btn btn-facebook btn-user btn-block">
                                             <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
                                         </a>
                                     </form>
