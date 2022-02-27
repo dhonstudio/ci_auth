@@ -114,18 +114,7 @@ class Auth extends CI_Controller {
             ],
         ];
 
-        $this->toast_id = 
-            isset($_POST['status']) ? (
-            $_POST['status'] == 'email_duplicate' ? 'email_duplicate' :
-            ($_POST['status'] == 'registration_success' ? 'registration_success' :
-            ($_POST['status'] == 'registration_failed' ? 'registration_failed' :
-            ($_POST['status'] == 'verify_success' ? 'verify_success' :
-            ($_POST['status'] == 'verify_failed' ? 'verify_failed' :
-            ($_POST['status'] == 'forgot_success' ? 'forgot_success' :
-            ($_POST['status'] == 'forgot_failed' ? 'forgot_failed' :
-            ($_POST['status'] == 'reset_success' ? 'reset_success' :
-            ($_POST['status'] == 'login_failed' ? 'login_failed'
-            : ''))))))))) : '';
+        $this->toast_id = isset($_POST['status']) ? $_POST['status'] : '';
 
         $this->get_version = isset($_GET['version']) ? $_GET['version'] : (isset($_POST['version']) ? $_POST['version'] : '');
         $this->version = $this->get_version == 'auth2' ? '2' : '';
@@ -561,27 +550,6 @@ class Auth extends CI_Controller {
         }
     }
 
-    public function redirect_post()
-    {
-        $data = [
-            'action'        => $_GET['action'],
-        ];
-
-        $posts = [
-            [
-                'post_name1'    => $_GET['post_name1'],
-                'post_value1'   => $_GET['post_value1'],
-            ],
-        ];
-        for ($i=2; $i <= 10; $i++) { 
-            if (isset($_GET['post_name'.$i])) $posts[$i-1]['post_name'.$i] = $_GET['post_name'.$i];
-            if (isset($_GET['post_value'.$i])) $posts[$i-1]['post_value'.$i] = $_GET['post_value'.$i];
-        }
-        $data['posts'] = $posts;
-
-        $this->load->view('ci_templates/redirect_post', $data);
-    }
-
     public function login_google(string $status = '')
 	{
         if ($status == 'success') {
@@ -685,4 +653,25 @@ class Auth extends CI_Controller {
             show_404();
         }
 	}
+
+    public function redirect_post()
+    {
+        $data = [
+            'action'        => $_GET['action'],
+        ];
+
+        $posts = [
+            [
+                'post_name1'    => $_GET['post_name1'],
+                'post_value1'   => $_GET['post_value1'],
+            ],
+        ];
+        for ($i=2; $i <= 10; $i++) { 
+            if (isset($_GET['post_name'.$i])) $posts[$i-1]['post_name'.$i] = $_GET['post_name'.$i];
+            if (isset($_GET['post_value'.$i])) $posts[$i-1]['post_value'.$i] = $_GET['post_value'.$i];
+        }
+        $data['posts'] = $posts;
+
+        $this->load->view('ci_templates/redirect_post', $data);
+    }
 }
