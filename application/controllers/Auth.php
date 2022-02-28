@@ -21,6 +21,13 @@ class Auth extends CI_Controller {
 
         /*
         | -------------------------------------------------------------------
+        |  Don't forget to set up encryption key
+        | -------------------------------------------------------------------
+        */
+        $this->load->library('encryption');
+
+        /*
+        | -------------------------------------------------------------------
         |  Set up this API connection section
         | -------------------------------------------------------------------
         */
@@ -67,8 +74,37 @@ class Auth extends CI_Controller {
         $this->secure_auth      = "DSA250222k";
 
         $this->load->helper('cookie');
+
+        /*
+        | -------------------------------------------------------------------
+        |  Device manager
+        | -------------------------------------------------------------------
+        */
+        $device             = $this->dhonapi->get($this->database, $this->table_devices);
+        $device_key         = array_search(htmlentities($_SERVER['HTTP_USER_AGENT']), array_column($device, 'htmlentities'));
+        $device_av          = !empty($device) ? ($device_key > -1 ? $device[$device_key] : 0) : 0;
+        $this->id_device    = $device_av === 0 ? $this->dhonapi->post($this->database, $this->table_devices, ['htmlentities' => htmlentities($_SERVER['HTTP_USER_AGENT'])])['id_device'] : $device_av['id_device'];
+
         if ($this->uri->segment(2) != 'login_google')
-        if ($this->input->cookie("{$this->cookie_prefix}{$this->secure_auth}") && $this->input->cookie("{$this->cookie_prefix}{$this->secure_prefix}")) redirect($this->auth_redirect);
+            if ($this->input->cookie("{$this->cookie_prefix}{$this->secure_auth}") && $this->input->cookie("{$this->cookie_prefix}{$this->secure_prefix}")) {
+                /*
+                | -------------------------------------------------------------------
+                |  Device manager
+                | -------------------------------------------------------------------
+                */
+                $auth_key = $this->encryption->decrypt($this->input->cookie("{$this->cookie_prefix}{$this->secure_auth}"));
+                $this->encryption->initialize(
+                    array(
+                        'cipher' => 'aes-256',
+                        'mode' => 'ctr',
+                        'key' => $auth_key
+                    )
+                );
+                $id     = $this->encryption->decrypt($this->input->cookie("{$this->cookie_prefix}{$this->secure_prefix}"));
+                $user   = $this->dhonapi->get($this->database, $this->table, ['id' => $id])[0];
+                if ($this->dhonapi->get($this->database, $this->table_u_devices, ['id_user' => $user['id'], 'id_device' => $this->id_device]))
+                    redirect($this->auth_redirect);
+            }
 
         $this->language['active'] = 'en';
 
@@ -198,13 +234,6 @@ class Auth extends CI_Controller {
 
     private function _login(array $user)
     {
-        /*
-        | -------------------------------------------------------------------
-        |  Don't forget to set up encryption key
-        | -------------------------------------------------------------------
-        */
-        $this->load->library('encryption');
-
         $auth_cookie = array(
             'name'   => $this->secure_auth,
             'value'  => $this->encryption->encrypt($user[0]['auth_key']),
@@ -231,10 +260,7 @@ class Auth extends CI_Controller {
         | -------------------------------------------------------------------
         |  Device manager
         | -------------------------------------------------------------------
-        */
-        $device     = $this->dhonapi->get($this->database, $this->table_devices);
-        $id_device  = empty($device) || !in_array(htmlentities($_SERVER['HTTP_USER_AGENT']), array_column($device, 'htmlentities')) ? $this->dhonapi->post($this->database, $this->table_devices, ['htmlentities' => htmlentities($_SERVER['HTTP_USER_AGENT'])])['id_device'] : $device[0]['id_device'];
-        
+        */        
         $ip_address = 
             !empty($_SERVER["HTTP_X_CLUSTER_CLIENT_IP"]) ? $_SERVER["HTTP_X_CLUSTER_CLIENT_IP"] : 
             (!empty($_SERVER["HTTP_X_CLIENT_IP"]) ? $_SERVER["HTTP_X_CLIENT_IP"] :
@@ -248,8 +274,8 @@ class Auth extends CI_Controller {
         $address    = $this->dhonapi->get($this->database, $this->table_addresses, ['ip_address' => $ip_address]);
         $id_address = empty($address) ? $this->dhonapi->post($this->database, $this->table_addresses, ['ip_address' => $ip_address, 'ip_info' => $this->dhonapi->curl("http://ip-api.com/json/{$ip_address}")])['id_address'] : $address[0]['id_address'];    
         
-        $user_device = $this->dhonapi->get($this->database, $this->table_u_devices, ['id_user' => $user[0]['id'], 'id_device' => $id_device]);
-        empty($user_device) ? $this->dhonapi->post($this->database, $this->table_u_devices, ['id_user' => $user[0]['id'], 'id_device' => $id_device, 'id_address' => $id_address, 'last_login' => time()]): $this->dhonapi->post($this->database, $this->table_u_devices, ['id_address' => $id_address, 'last_login' => time(), 'id' => $user_device[0]['id']]);
+        $user_device = $this->dhonapi->get($this->database, $this->table_u_devices, ['id_user' => $user[0]['id'], 'id_device' => $this->id_device]);
+        empty($user_device) ? $this->dhonapi->post($this->database, $this->table_u_devices, ['id_user' => $user[0]['id'], 'id_device' => $this->id_device, 'id_address' => $id_address, 'last_login' => time()]): $this->dhonapi->post($this->database, $this->table_u_devices, ['id_address' => $id_address, 'last_login' => time(), 'id' => $user_device[0]['id']]);
     }
 
     public function register()
