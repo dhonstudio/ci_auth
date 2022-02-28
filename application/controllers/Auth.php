@@ -44,6 +44,15 @@ class Auth extends CI_Controller {
 
         /*
         | -------------------------------------------------------------------
+        |  Set up this if there is device manager
+        | -------------------------------------------------------------------
+        */
+        $this->table_devices    = 'devices';
+        $this->table_addresses  = 'addresses';
+        $this->table_u_devices  = 'user_device';
+
+        /*
+        | -------------------------------------------------------------------
         |  Set up this Cookie and Auth Service section
         | -------------------------------------------------------------------
         */
@@ -217,6 +226,30 @@ class Auth extends CI_Controller {
         );
         set_cookie($auth_cookie);
         set_cookie($user_cookie);
+
+        /*
+        | -------------------------------------------------------------------
+        |  Device manager
+        | -------------------------------------------------------------------
+        */
+        $device     = $this->dhonapi->get($this->database, $this->table_devices);
+        $id_device  = empty($device) || !in_array(htmlentities($_SERVER['HTTP_USER_AGENT']), array_column($device, 'htmlentities')) ? $this->dhonapi->post($this->database, $this->table_devices, ['htmlentities' => htmlentities($_SERVER['HTTP_USER_AGENT'])])['id_device'] : $device[0]['id_device'];
+        
+        $ip_address = 
+            !empty($_SERVER["HTTP_X_CLUSTER_CLIENT_IP"]) ? $_SERVER["HTTP_X_CLUSTER_CLIENT_IP"] : 
+            (!empty($_SERVER["HTTP_X_CLIENT_IP"]) ? $_SERVER["HTTP_X_CLIENT_IP"] :
+            (!empty($_SERVER["HTTP_CLIENT_IP"]) ? $_SERVER["HTTP_CLIENT_IP"] :
+            (!empty($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] :
+            (!empty($_SERVER["HTTP_X_FORWARDED"]) ? $_SERVER["HTTP_X_FORWARDED"] :
+            (!empty($_SERVER["HTTP_FORWARDED_FOR"]) ? $_SERVER["HTTP_FORWARDED_FOR"] :
+            (!empty($_SERVER["HTTP_FORWARDED"]) ? $_SERVER["HTTP_FORWARDED"] :
+            $_SERVER["REMOTE_ADDR"]
+        ))))));
+        $address    = $this->dhonapi->get($this->database, $this->table_addresses, ['ip_address' => $ip_address]);
+        $id_address = empty($address) ? $this->dhonapi->post($this->database, $this->table_addresses, ['ip_address' => $ip_address, 'ip_info' => $this->dhonapi->curl("http://ip-api.com/json/{$ip_address}")])['id_address'] : $address[0]['id_address'];    
+        
+        $user_device = $this->dhonapi->get($this->database, $this->table_u_devices, ['id_user' => $user[0]['id'], 'id_device' => $id_device]);
+        empty($user_device) ? $this->dhonapi->post($this->database, $this->table_u_devices, ['id_user' => $user[0]['id'], 'id_device' => $id_device, 'id_address' => $id_address, 'last_login' => time()]): $this->dhonapi->post($this->database, $this->table_u_devices, ['id_address' => $id_address, 'last_login' => time(), 'id' => $user_device[0]['id']]);
     }
 
     public function register()
