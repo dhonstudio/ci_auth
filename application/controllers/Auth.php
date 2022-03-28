@@ -33,6 +33,7 @@ class Auth extends CI_Controller {
         */
         $this->dhonapi->api_url['development'] = 'http://localhost/ci_api/';
         $this->dhonapi->api_url['production'] = 'https://dhonstudio.com/ci/api/';
+        $this->dhonapi->api_url['testing'] = 'https://dhonstudio.com/ci/api/';
         $this->dhonapi->username = 'admin';
         $this->dhonapi->password = 'admin';
 
@@ -41,7 +42,7 @@ class Auth extends CI_Controller {
         |  Set up this API db and email
         | -------------------------------------------------------------------
         */
-        $this->database         = 'project';
+        $this->database         = ENVIRONMENT == 'testing' ? 'project_dev' : 'project';
         $this->table            = 'user_ci';
         $this->email_address    = 'no-reply@dhonstudio.com';
         $this->email_sender     = 'Dhon Studio';
@@ -66,6 +67,9 @@ class Auth extends CI_Controller {
         if (ENVIRONMENT == 'development') {
             $this->cookie_prefix    = 'm';
             $this->auth_redirect    = 'http://localhost/ci_dashboard';
+        } else if (ENVIRONMENT == 'testing') {
+            $this->cookie_prefix    = 'm';
+            $this->auth_redirect    = 'http://dev.dhonstudio.com/ci/dashboard';
         } else {
             $this->cookie_prefix    = '__Secure-';
             $this->auth_redirect    = 'https://dhonstudio.com/ci/dashboard';
