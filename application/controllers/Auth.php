@@ -9,10 +9,9 @@ class Auth extends CI_Controller {
 	{
 		parent::__construct();
 
-        require_once __DIR__ . '/../../assets/ci_helpers/style_helper.php';
-        require_once __DIR__ . '/../../assets/ci_libraries/DhonAPI.php';
+        $this->load->helper('libraries');
+
         $this->dhonapi = new DhonAPI;
-        require_once __DIR__ . '/../../assets/ci_libraries/DhonEmail.php';
         $this->dhonemail = new DhonEmail;
         $this->load->library('form_validation');
         $this->load->library('google');
@@ -163,10 +162,10 @@ class Auth extends CI_Controller {
             ],
         ];
 
-        $this->toast_id = isset($_POST['status']) ? $_POST['status'] : '';
+        $this->toast_id     = isset($_POST['status']) ? $_POST['status'] : '';
 
-        $this->get_version = isset($_GET['version']) ? $_GET['version'] : (isset($_POST['version']) ? $_POST['version'] : '');
-        $this->version = $this->get_version == 'auth2' ? '2' : '';
+        $this->get_version  = isset($_GET['version']) ? $_GET['version'] : (isset($_POST['version']) ? $_POST['version'] : '');
+        $this->version      = $this->get_version == 'auth2' ? '2' : '';
     }
 
 	public function index()
