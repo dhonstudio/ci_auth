@@ -7,76 +7,6 @@ class Auth extends CI_Controller {
     
     public function __construct()
 	{
-		parent::__construct();
-
-        $this->load->helper('libraries');
-
-        $this->dhonapi = new DhonAPI;
-        $this->dhonemail = new DhonEmail;
-        $this->load->library('form_validation');
-        $this->load->library('google');
-        $this->load->library('facebook');
-        $this->load->helper('string');
-
-        /*
-        | -------------------------------------------------------------------
-        |  Don't forget to set up encryption key
-        | -------------------------------------------------------------------
-        */
-        $this->load->library('encryption');
-
-        /*
-        | -------------------------------------------------------------------
-        |  Set up this API connection section
-        | -------------------------------------------------------------------
-        */
-        $this->dhonapi->api_url['development'] = 'http://localhost/ci_api/';
-        $this->dhonapi->api_url['production'] = 'https://dhonstudio.com/ci/api/';
-        $this->dhonapi->api_url['testing'] = 'https://dhonstudio.com/ci/api/';
-        $this->dhonapi->username = 'admin';
-        $this->dhonapi->password = 'admin';
-
-        /*
-        | -------------------------------------------------------------------
-        |  Set up this API db and email
-        | -------------------------------------------------------------------
-        */
-        $this->database         = ENVIRONMENT == 'testing' ? 'project_dev' : 'project';
-        $this->table            = 'user_ci';
-        $this->email_address    = 'no-reply@dhonstudio.com';
-        $this->email_sender     = 'Dhon Studio';
-        $this->email_cc         = 'dhonstudio@yahoo.com';
-        $this->email_logo       = 'https://dhonstudio.com/assets/img/logo.png';
-        $this->email_whatsapp   = 'https://wa.me/6287700889913';
-
-        /*
-        | -------------------------------------------------------------------
-        |  Set up this if there is device manager
-        | -------------------------------------------------------------------
-        */
-        $this->table_devices    = 'devices';
-        $this->table_addresses  = 'addresses';
-        $this->table_u_devices  = 'user_device';
-
-        /*
-        | -------------------------------------------------------------------
-        |  Set up this Cookie and Auth Service section
-        | -------------------------------------------------------------------
-        */
-        if (ENVIRONMENT == 'development') {
-            $this->cookie_prefix    = 'm';
-            $this->auth_redirect    = 'http://localhost/ci_dashboard';
-        } else if (ENVIRONMENT == 'testing') {
-            $this->cookie_prefix    = 'm';
-            $this->auth_redirect    = 'http://dev.dhonstudio.com/ci/dashboard';
-        } else {
-            $this->cookie_prefix    = '__Secure-';
-            $this->auth_redirect    = 'https://dhonstudio.com/ci/dashboard';
-        }
-        $this->secure_prefix    = 'DSC250222s';
-        $this->secure_auth      = "DSA250222k";
-
-        $this->load->helper('cookie');
 
         /*
         | -------------------------------------------------------------------
@@ -111,58 +41,9 @@ class Auth extends CI_Controller {
 
         $this->language['active'] = 'en';
 
-        $this->toasts = [
-            [
-                'id'        => 'email_duplicate',
-                'title'     => 'Failed',
-                'message'   => 'Email address is already registered'
-            ],
-            [
-                'id'        => 'registration_success',
-                'delay'     => 10000,
-                'title'     => 'Success',
-                'message'   => 'Registration successfully, please verify your account by link sent to your email'
-            ],
-            [
-                'id'        => 'registration_failed',
-                'delay'     => 10000,
-                'title'     => 'Failed',
-                'message'   => 'Registration failed, please repeat your registration'
-            ],
-            [
-                'id'        => 'verify_success',
-                'title'     => 'Success',
-                'message'   => 'Verification success, please login'
-            ],
-            [
-                'id'        => 'verify_failed',
-                'title'     => 'Failed',
-                'message'   => 'Verification failed, please contact admin'
-            ],
-            [
-                'id'        => 'forgot_success',
-                'delay'     => 10000,
-                'title'     => 'Success',
-                'message'   => 'Success, please reset password by link sent to your email'
-            ],
-            [
-                'id'        => 'forgot_failed',
-                'title'     => 'Failed',
-                'message'   => 'Failed, please contact admin'
-            ],
-            [
-                'id'        => 'reset_success',
-                'title'     => 'Success',
-                'message'   => 'Password successfully changed, please login'
-            ],
-            [
-                'id'        => 'login_failed',
-                'title'     => 'Failed',
-                'message'   => 'Login Failed'
-            ],
-        ];
+        
 
-        $this->toast_id     = isset($_POST['status']) ? $_POST['status'] : '';
+        
 
         $this->get_version  = isset($_GET['version']) ? $_GET['version'] : (isset($_POST['version']) ? $_POST['version'] : '');
         $this->version      = $this->get_version == 'auth2' ? '2' : '';
