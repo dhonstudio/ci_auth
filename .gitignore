@@ -3,6 +3,13 @@ application/helpers/email_config_helper.php
 application/helpers/google_helper.php
 application/helpers/facebook_helper.php
 assets/
+system/
+.editorconfig
+composer.json
+contributing.md
+license.txt
+readme.rst
+desktop.ini
 
 .DS_Store
 
