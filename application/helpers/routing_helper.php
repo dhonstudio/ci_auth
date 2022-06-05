@@ -1,7 +1,7 @@
 <?php
 $ci = get_instance();
 
-$ci->load->library('dhonglobal');
+$ci->load->library('DhonGlobal');
 $this->dhonglobal = new DhonGlobal;
 
 /*
