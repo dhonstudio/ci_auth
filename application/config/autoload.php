@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------
@@ -91,6 +91,8 @@ $autoload['drivers'] = array();
 */
 $autoload['helper'] = array(
     'url',
+    'global',
+    'routing'
 );
 
 /*
