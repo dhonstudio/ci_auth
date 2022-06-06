@@ -68,17 +68,17 @@ class DhonGlobal
             'action' => $params['action'],
         ];
 
-        $params = [
+        $posts = [
             [
                 'post_name1'    => $params['post_name1'],
                 'post_value1'   => $params['post_value1'],
             ],
         ];
         for ($i = 2; $i <= 10; $i++) {
-            if (isset($params['post_name' . $i])) $params[$i - 1]['post_name' . $i] = $params['post_name' . $i];
-            if (isset($params['post_value' . $i])) $params[$i - 1]['post_value' . $i] = $params['post_value' . $i];
+            if (isset($params['post_name' . $i])) $posts[$i - 1]['post_name' . $i] = $params['post_name' . $i];
+            if (isset($params['post_value' . $i])) $posts[$i - 1]['post_value' . $i] = $params['post_value' . $i];
         }
-        $data['posts'] = $params;
+        $data['posts'] = $posts;
 
         $this->load->view('ci_templates/redirect_post', $data);
     }
