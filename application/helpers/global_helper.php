@@ -2,6 +2,8 @@
 $ci = get_instance();
 
 $ci->load->library('form_validation');
+$ci->load->library('DhonGlobal');
+$ci->dhonglobal = new DhonGlobal;
 $ci->load->library('DhonAPI');
 $ci->dhonapi = new DhonAPI;
 // $ci->load->library('encryption');
