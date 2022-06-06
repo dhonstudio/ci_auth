@@ -21,8 +21,16 @@ class Register extends CI_Controller
             $users = $this->dhonapi->getAllUsers();
             $emails = array_column($users, 'email');
             if (in_array($this->input->post('email'), $emails)) {
-                echo 'duplicate';
-                // redirect('auth/redirect_post?action=auth/register&post_name1=status&post_value1=email_duplicate&post_name2=firstName&post_value2=' . $this->input->post('firstName') . '&post_name3=lastName&post_value3=' . $this->input->post('lastName') . '&post_name4=email&post_value4=' . $this->input->post('email') . '&post_name5=version&post_value5=' . $_GET['version']);
+                $posts = [];
+                for ($i = 1; $i < count($_POST); $i++) {
+                    $x = $i - 1;
+                    $posts['post_name' . $i] = array_keys($_POST)[$x];
+                    $posts['post_value' . $i] = array_values($_POST)[$x];
+                }
+                $y = count($_POST) + 1;
+                $posts['post_name' . $y] = 'toast_id';
+                $posts['post_value' . $y] = 'email_duplicate';
+                $this->dhonglobal->redirect_post(array_merge(['action' => $_SERVER['HTTP_REFERER']], $posts));
             } else {
                 echo 'success';
                 // $token  = base64_encode(random_bytes(32));
@@ -42,7 +50,7 @@ class Register extends CI_Controller
                 // redirect('auth/redirect_post?action=auth&post_name1=status&post_value1=registration_success&post_name2=version&post_value2=' . $_GET['version']);
             }
         } else {
-            $this->dhonglobal->redirect_post(['action' => $_SERVER['HTTP_REFERER']]);
+            $this->dhonglobal->redirect_post(['action' => $_SERVER['HTTP_REFERER']], $_POST);
         }
     }
 }

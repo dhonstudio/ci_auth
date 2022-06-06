@@ -52,9 +52,9 @@ class DhonGlobal
      * @param	array	$params data
      * @return	void
      */
-    public function redirect_post(array $params)
+    public function redirect_post(array $params, array $post = [])
     {
-        if ($_POST) {
+        if (count($post) > 0) {
             $posts = [];
             for ($i = 1; $i < count($_POST); $i++) {
                 $x = $i - 1;
