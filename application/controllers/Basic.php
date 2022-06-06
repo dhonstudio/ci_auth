@@ -7,6 +7,9 @@ class Basic extends CI_Controller
 {
     public $language;
     public $data;
+    public $registerFormGroup;
+    public $toasts;
+    public $toast_id;
 
     public function __construct()
     {
@@ -39,66 +42,6 @@ class Basic extends CI_Controller
         //         :                               'https://dhonstudio.com/ci/dashboard'
         //     );
 
-        // 
-
-        // /*
-        // | -------------------------------------------------------------------
-        // |  Set up toasts
-        // | -------------------------------------------------------------------
-        // */
-        // $this->toasts = [
-        //     [
-        //         'id'        => 'email_duplicate',
-        //         'title'     => 'Failed',
-        //         'message'   => 'Email address is already registered'
-        //     ],
-        //     [
-        //         'id'        => 'registration_success',
-        //         'delay'     => 10000,
-        //         'title'     => 'Success',
-        //         'message'   => 'Registration successfully, please verify your account by link sent to your email'
-        //     ],
-        //     [
-        //         'id'        => 'registration_failed',
-        //         'delay'     => 10000,
-        //         'title'     => 'Failed',
-        //         'message'   => 'Registration failed, please repeat your registration'
-        //     ],
-        //     [
-        //         'id'        => 'verify_success',
-        //         'title'     => 'Success',
-        //         'message'   => 'Verification success, please login'
-        //     ],
-        //     [
-        //         'id'        => 'verify_failed',
-        //         'title'     => 'Failed',
-        //         'message'   => 'Verification failed, please contact admin'
-        //     ],
-        //     [
-        //         'id'        => 'forgot_success',
-        //         'delay'     => 10000,
-        //         'title'     => 'Success',
-        //         'message'   => 'Success, please reset password by link sent to your email'
-        //     ],
-        //     [
-        //         'id'        => 'forgot_failed',
-        //         'title'     => 'Failed',
-        //         'message'   => 'Failed, please contact admin'
-        //     ],
-        //     [
-        //         'id'        => 'reset_success',
-        //         'title'     => 'Success',
-        //         'message'   => 'Password successfully changed, please login'
-        //     ],
-        //     [
-        //         'id'        => 'login_failed',
-        //         'title'     => 'Failed',
-        //         'message'   => 'Login Failed'
-        //     ],
-        // ];
-
-        // $this->toast_id = isset($_POST['toast_id']) ? $_POST['toast_id'] : '';
-
         $this->load->helper('routing');
     }
 
@@ -110,7 +53,7 @@ class Basic extends CI_Controller
     {
         /*
         | -------------------------------------------------------------------
-        |  Set up registerFormGroup on register helper
+        |  Set up registerFormGroup and toasts on register helper
         | -------------------------------------------------------------------
         */
         $this->load->helper('register');
@@ -140,8 +83,8 @@ class Basic extends CI_Controller
             $this->load->view('ci_templates/header', $this->data);
             $this->load->view('register');
             $this->load->view('copyright');
-            // $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
-            // $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
+            $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
+            if ($this->toast_id) $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
             $this->load->view('ci_templates/end');
         }
     }
