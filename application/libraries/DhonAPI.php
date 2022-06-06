@@ -4,7 +4,8 @@ class DhonAPI
 {
     protected $api_url = [
         'development' => 'http://localhost/ci_api2/',
-        'testing' => 'http://dev.dhonstudio.com/ci/api2/'
+        'testing' => 'http://dev.dhonstudio.com/ci/api2/',
+        'production' => 'https://dhonstudio.com/ci/api2/',
     ];
     protected $username = 'admin';
     protected $password = 'admin';
