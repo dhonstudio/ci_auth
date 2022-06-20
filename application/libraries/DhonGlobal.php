@@ -37,7 +37,19 @@ class DhonGlobal
         $url        = $params['url'];
         $method     = $params['method'];
 
+        if (isset($params['data'])) {
+            foreach ($params['data'] as $key => $value) {
+                $value = strpos($value, '&') !== false ? str_replace('&', 'dansimbol', $value) : $value;
+                $posts[] = $key . '=' . $value;
+            }
+            $data = implode('&', $posts);
+        }
+
         $curl = curl_init();
+        if ($method == 'post') {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        }
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($curl, CURLOPT_USERPWD, "{$username}:{$password}");
         curl_setopt($curl, CURLOPT_URL, "{$url}");
