@@ -5,7 +5,6 @@ date_default_timezone_set('Asia/Jakarta');
 
 class Basic extends CI_Controller
 {
-    public $language;
     public $data;
     public $registerFormGroup;
     public $toasts;
@@ -15,7 +14,7 @@ class Basic extends CI_Controller
     {
         parent::__construct();
 
-        $this->language['active'] = "en";
+        $this->load->helper('routing');
 
         // /*
         // | -------------------------------------------------------------------
@@ -43,12 +42,11 @@ class Basic extends CI_Controller
         //     : (ENVIRONMENT == 'testing' ?   'http://dev.dhonstudio.com/ci/dashboard'
         //         :                               'https://dhonstudio.com/ci/dashboard'
         //     );
-
-        $this->load->helper('routing');
     }
 
     public function index()
     {
+        # code...
     }
 
     public function _register_form()
@@ -85,8 +83,8 @@ class Basic extends CI_Controller
             $this->load->view('ci_templates/header', $this->data);
             $this->load->view('register');
             $this->load->view('copyright');
-            $this->load->view('ci_templates/toast', ['toasts' => $this->toasts]);
-            if ($this->toast_id) $this->load->view('ci_scripts/toast_show', ['toast_id' => $this->toast_id]);
+            // $this->load->view('ci_templates/toast2', $this->toast);
+            // if ($this->toast_title) $this->load->view('ci_scripts/toast_show2');
             $this->load->view('ci_templates/end');
         }
     }
