@@ -1,11 +1,38 @@
 <?php
 $ci = get_instance();
 
+/*
+| ------------------------------------------------------------------
+|  Set up Global CI_Loader
+| ------------------------------------------------------------------
+*/
 $ci->load->library('form_validation');
+$ci->load->helper('url');
+$ci->load->helper('string');
+
+/*
+| ------------------------------------------------------------------
+|  Set up Asset Path and Asset Loader
+| ------------------------------------------------------------------
+*/
+if (ENVIRONMENT == 'development') {
+    $path = '/../../';
+} else if (ENVIRONMENT == 'testing') {
+    $path = '../../../../../../';
+} else if (ENVIRONMENT == 'production') {
+    $path = '../../../../../';
+}
+
+/*
+| ------------------------------------------------------------------
+|  Set up Global Custom Loader
+| ------------------------------------------------------------------
+*/
 $ci->load->library('DhonGlobal');
 $ci->dhonglobal = new DhonGlobal;
 $ci->load->library('DhonAPI');
 $ci->dhonapi = new DhonAPI;
+
 // $ci->load->library('encryption');
 // $ci->load->helper('cookie');
 // $ci->load->helper('string');
@@ -18,23 +45,14 @@ $ci->dhonapi = new DhonAPI;
 
 // $ci->dhonapi        = $ci->load->database($ci->database, TRUE);
 
-if (ENVIRONMENT == 'development') {
-    $path = '/../../';
-} else if (ENVIRONMENT == 'testing') {
-    $path = '../../../../../../';
-} else if (ENVIRONMENT == 'production') {
-    $path = '../../../../../';
-}
-require_once __DIR__ . $path . 'assets/ci_helpers/style_helper.php';
-
 /*
 | ------------------------------------------------------------------
 |  Set up Global Variable
 | ------------------------------------------------------------------
 */
-$ci->language['active'] = "en";
 $ci->data = [
-    'meta'    => [
+    'language'  => null,
+    'meta'      => [
         'keywords'      => null,
         'author'        => 'Dhon Studio',
         'generator'     => null,
@@ -44,11 +62,14 @@ $ci->data = [
     'favicon'       => null,
     'title'         => 'Dhon Studio Auth',
     'header_assets' => [
-        $ci->css['bootstrap513min'],
-        $ci->js['bootstrapbundle513min'],
-        $ci->js['jquery360'],
+        // $ci->css['bootstrap513min'],
+        // $ci->js['bootstrapbundle513min'],
+        // $ci->js['jquery360'],
+        '
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        '
     ],
     'body_id'       => null,
-    'body_class'    => 'bg-primary',
+    'body_class'    => null,
     'body_style'    => null,
 ];

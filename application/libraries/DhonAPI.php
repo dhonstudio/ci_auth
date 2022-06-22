@@ -28,4 +28,15 @@ class DhonAPI
             'method' => "get",
         ])['data'];
     }
+
+    public function insert(array $data)
+    {
+        return $this->dhonglobal->dhon_curl([
+            'username' => $this->username,
+            'password' => $this->password,
+            'url' => "{$this->api_url[ENVIRONMENT]}userci/insert",
+            'method' => "post",
+            'data' => $data,
+        ]);
+    }
 }
